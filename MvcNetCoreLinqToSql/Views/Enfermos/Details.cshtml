@@ -1,0 +1,32 @@
+﻿@model Enfermo
+
+<div class="container mt-5">
+    <h1>Enfermo Detalles</h1>
+    <hr/>
+    <p>
+        <a asp-controller="Enfermos" asp-action="Index" class="btn btn-info">
+            Atras
+        </a>
+    </p>
+    <hr/>
+    <ul class="list-group">
+        <li class="list-group-item">
+            Inscripcion: @Model.Inscripcion
+        </li>
+        <li class="list-group-item">
+            Apellido: @Model.Apellido
+        </li>
+        <li class="list-group-item">
+            Direccion: @Model.Direccion
+        </li>
+        <li class="list-group-item">
+            Fecha Nacimiento: @Model.Fecha_Nac
+        </li>
+        <li class="list-group-item">
+            Genero: @Model.S
+        </li>
+        <li class="list-group-item">
+            NSS: @Model.NSS
+        </li>
+    </ul>
+</div>

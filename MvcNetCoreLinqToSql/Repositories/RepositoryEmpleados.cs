@@ -10,11 +10,99 @@ namespace MvcNetCoreLinqToSql.Repositories
 
         public RepositoryEmpleados()
         {
-            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Password=MCSD2023";
             string sql = "select * from EMP";
-            SqlDataAdapter adEmp = new SqlDataAdapter(connectionString, sql);
+            string connectionString = @"Data Source=LOCALHOST\SQLEXPRESS;Initial Catalog=HOSPITAL;Persist Security Info=True;User ID=SA;Password=MCSD2023";
+            SqlDataAdapter adEmp = new SqlDataAdapter(sql, connectionString);
             this.tablaEmpleados = new DataTable();
             adEmp.Fill(tablaEmpleados);
+        }
+
+        public ResumenEmpleados GetEmpleadosOficio(string oficio)
+        {
+            var consulta = from datos in this.tablaEmpleados.AsEnumerable()
+                           where datos.Field<string>("OFICIO") == oficio
+                           select datos;
+            consulta = consulta.OrderBy( empleadoRow => empleadoRow.Field<int>("SALARIO"));
+            int personas = consulta.Count();
+            int maximo = consulta.Max(z => z.Field<int>("SALARIO"));
+            double media = consulta.Average(x => x.Field<int>("SALARIO"));
+            List<Empleado> empleados = new List<Empleado>();
+            foreach (var row in consulta)
+            {
+                Empleado empleado = new Empleado
+                {
+                    IdEmpleado = row.Field<int>("EMP_NO"),
+                    Apellido = row.Field<string>("APELLIDO"),
+                    Oficio = row.Field<string>("OFICIO"),
+                    Salario = row.Field<int>("SALARIO"),
+                    IdDepartamento = row.Field<int>("DEPT_NO")
+                };
+                empleados.Add(empleado);
+            }
+            ResumenEmpleados resumen = new ResumenEmpleados
+            {
+                Personas = personas,
+                MaxSalario = maximo,
+                MediaSalarial = media,
+                Empleados = empleados
+            };
+            return resumen;
+        }
+
+        public ResumenEmpleados GetEmpleadosDepartamento(int departamento)
+        {
+            var consulta = from datos in this.tablaEmpleados.AsEnumerable()
+                           where datos.Field<int>("DEPT_NO") == departamento
+                           select datos;
+            consulta = consulta.OrderBy(empleadoRow => empleadoRow.Field<int>("SALARIO"));
+            int personas = consulta.Count();
+            int maximo = consulta.Max(z => z.Field<int>("SALARIO"));
+            double media = consulta.Average(x => x.Field<int>("SALARIO"));
+            List<Empleado> empleados = new List<Empleado>();
+            foreach (var row in consulta)
+            {
+                Empleado empleado = new Empleado
+                {
+                    IdEmpleado = row.Field<int>("EMP_NO"),
+                    Apellido = row.Field<string>("APELLIDO"),
+                    Oficio = row.Field<string>("OFICIO"),
+                    Salario = row.Field<int>("SALARIO"),
+                    IdDepartamento = row.Field<int>("DEPT_NO")
+                };
+                empleados.Add(empleado);
+            }
+            ResumenEmpleados resumen = new ResumenEmpleados
+            {
+                Personas = personas,
+                MaxSalario = maximo,
+                MediaSalarial = media,
+                Empleados = empleados
+            };
+            return resumen;
+        }
+
+        public List<string> GetOficios()
+        {
+            var consulta = (from datos in this.tablaEmpleados.AsEnumerable()
+                           select datos.Field<string>("OFICIO")).Distinct();
+            List<string> oficios = new List<string>();
+            foreach (string ofi in consulta)
+            {
+                oficios.Add(ofi);
+            }
+            return oficios;
+        }
+
+        public List<int> GetDepartamentos()
+        {
+            var consulta = (from datos in this.tablaEmpleados.AsEnumerable()
+                            select datos.Field<int>("DEPT_NO")).Distinct();
+            List<int> departamento = new List<int>();
+            foreach (int dept in consulta)
+            {
+                departamento.Add(dept);
+            }
+            return departamento;
         }
 
         public List<Empleado> GetEmpleados()
@@ -50,6 +138,35 @@ namespace MvcNetCoreLinqToSql.Repositories
             empleado.IdDepartamento = row.Field<int>("DEPT_NO");
             return empleado;
 
+        }
+
+        public List<Empleado> GetEmpleadosOficioSalario(string oficio, int salario)
+        {
+            var consulta = from datos in this.tablaEmpleados.AsEnumerable()
+                           where datos.Field<string>("OFICIO") == oficio
+                           && datos.Field<int>("SALARIO") >= salario
+                           select datos;
+            if (consulta.Count() == 0)
+            {
+                return null;
+            }
+            else
+            {
+                List<Empleado> empleados = new List<Empleado>();
+                foreach(var row in consulta)
+                {
+                    Empleado empleado = new Empleado
+                    {
+                        IdEmpleado = row.Field<int>("EMP_NO"),
+                        Apellido = row.Field<string>("APELLIDO"),
+                        Oficio = row.Field<string>("OFICIO"),
+                        Salario = row.Field<int>("SALARIO"),
+                        IdDepartamento = row.Field<int>("DEPT_NO")
+                    };
+                    empleados.Add(empleado);
+                }
+                return empleados;
+            }
         }
     }
 }
